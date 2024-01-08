@@ -1,0 +1,24 @@
+version: 0.2
+        
+phases:
+  install:
+    on-failure: ABORT
+    runtime-versions:
+      php: 8.2
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - echo 'Logging into ECR ...'
+      - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin $REPO
+  build:
+    on-failure: ABORT
+    commands:
+      - echo "Starting docker build"
+      - docker build -t php-base-image .
+      - docker tag php-base-image:latest 242611965122.dkr.ecr.eu-west-1.amazonaws.com/php-base-image:latest
+      - docker push 242611965122.dkr.ecr.eu-west-1.amazonaws.com/php-base-image:latest                      # Uzbūvēta konteinera izvietošana ECR repozitorijā
+  post_build:
+    on-failure: ABORT
+    commands:
+      - echo "Docker images successfully built!"
+
